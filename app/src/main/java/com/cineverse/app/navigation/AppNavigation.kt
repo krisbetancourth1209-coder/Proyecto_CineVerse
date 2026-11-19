@@ -1,4 +1,3 @@
-
 package com.cineverse.app.navigation
 
 import androidx.compose.foundation.layout.padding
@@ -10,6 +9,8 @@ import androidx.navigation.compose.*
 
 import com.cineverse.app.ui.screens.HomeScreen
 import com.cineverse.app.ui.screens.CatalogScreen
+import com.cineverse.app.ui.screens.SearchScreen
+import com.cineverse.app.ui.screens.DetailScreen
 
 @Composable
 fun AppNavigation() {
@@ -18,7 +19,8 @@ fun AppNavigation() {
 
     val items = listOf(
         "home" to "Inicio",
-        "catalog" to "Catálogo"
+        "catalog" to "Catálogo",
+        "search" to "Buscar"
     )
 
     Scaffold(
@@ -69,7 +71,20 @@ fun AppNavigation() {
             }
 
             composable("catalog") {
-                CatalogScreen()
+                CatalogScreen() // <-- Sin parámetros por ahora
+            }
+
+            composable("search") {
+                SearchScreen(
+                    onMovieClick = { movieId ->
+                        navController.navigate("detail/$movieId")
+                    }
+                )
+            }
+
+            composable("detail/{movieId}") { backStackEntry ->
+                val movieId = backStackEntry.arguments?.getString("movieId")?.toIntOrNull() ?: 0
+                DetailScreen(movieId = movieId)
             }
         }
     }

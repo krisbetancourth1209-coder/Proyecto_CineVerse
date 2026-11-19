@@ -1,6 +1,7 @@
-
 package com.cineverse.app.ui.screens
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
@@ -9,7 +10,10 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.cineverse.app.data.MovieRepository
 import com.cineverse.app.data.model.Genre
@@ -17,6 +21,13 @@ import com.cineverse.app.data.model.Movie
 import com.cineverse.app.ui.components.MovieCard
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+
+private val CinemaPurpleBg = Color(0xFF140B24)
+private val CinemaPurpleCard = Color(0xFF22133B)
+private val CinemaGold = Color(0xFFD4AF37)
+private val CinemaGoldBright = Color(0xFFF3D06B)
+private val CinemaTextPrimary = Color(0xFFF8F5FF)
+private val CinemaTextSecondary = Color(0xFFD6CCE8)
 
 @Composable
 fun CatalogScreen() {
@@ -64,61 +75,67 @@ fun CatalogScreen() {
         it.title.contains(searchText, ignoreCase = true)
     }
 
-    // Usamos LazyVerticalGrid para que toda la pantalla se desplace fluidamente sin conflictos
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
         modifier = Modifier
             .fillMaxSize()
+            .background(CinemaPurpleBg)
             .padding(16.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
-        // Encabezado: Título
         item(span = { GridItemSpan(maxLineSpan) }) {
             Text(
                 text = "Explorar películas",
-                style = MaterialTheme.typography.headlineMedium
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                color = CinemaGoldBright
             )
         }
 
-        // Espaciador
         item(span = { GridItemSpan(maxLineSpan) }) {
             Spacer(modifier = Modifier.height(4.dp))
         }
 
-        // Buscador
         item(span = { GridItemSpan(maxLineSpan) }) {
             OutlinedTextField(
                 value = searchText,
                 onValueChange = { searchText = it },
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = {
-                    Text("Buscar películas...")
+                    Text("Buscar películas...", color = CinemaTextSecondary)
                 },
                 singleLine = true,
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(12.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = CinemaPurpleCard,
+                    unfocusedContainerColor = CinemaPurpleCard,
+                    focusedTextColor = CinemaTextPrimary,
+                    unfocusedTextColor = CinemaTextPrimary,
+                    cursorColor = CinemaGold,
+                    focusedBorderColor = CinemaGold,
+                    unfocusedBorderColor = CinemaGold.copy(alpha = 0.5f)
+                )
             )
         }
 
-        // Espaciador
         item(span = { GridItemSpan(maxLineSpan) }) {
             Spacer(modifier = Modifier.height(4.dp))
         }
 
-        // Título de Géneros
         item(span = { GridItemSpan(maxLineSpan) }) {
             Text(
                 text = "Géneros",
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = CinemaTextPrimary
             )
         }
 
-        // Espaciador
         item(span = { GridItemSpan(maxLineSpan) }) {
             Spacer(modifier = Modifier.height(2.dp))
         }
 
-        // Chips de Géneros
         item(span = { GridItemSpan(maxLineSpan) }) {
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -126,7 +143,14 @@ fun CatalogScreen() {
                 FilterChip(
                     selected = selectedGenre == null,
                     onClick = { selectedGenre = null },
-                    label = { Text("Todos") }
+                    label = { Text("Todos", fontWeight = FontWeight.Medium) },
+                    border = BorderStroke(1.dp, CinemaGold.copy(alpha = 0.7f)),
+                    colors = FilterChipDefaults.filterChipColors(
+                        containerColor = CinemaPurpleCard,
+                        labelColor = CinemaTextPrimary,
+                        selectedContainerColor = CinemaGold,
+                        selectedLabelColor = CinemaPurpleBg
+                    )
                 )
 
                 genres.take(4).forEach { genre ->
@@ -135,18 +159,23 @@ fun CatalogScreen() {
                         onClick = {
                             selectedGenre = genre.id
                         },
-                        label = { Text(genre.name) }
+                        label = { Text(genre.name, fontWeight = FontWeight.Medium) },
+                        border = BorderStroke(1.dp, CinemaGold.copy(alpha = 0.7f)),
+                        colors = FilterChipDefaults.filterChipColors(
+                            containerColor = CinemaPurpleCard,
+                            labelColor = CinemaTextPrimary,
+                            selectedContainerColor = CinemaGold,
+                            selectedLabelColor = CinemaPurpleBg
+                        )
                     )
                 }
             }
         }
 
-        // Espaciador antes de la cuadrícula de películas
         item(span = { GridItemSpan(maxLineSpan) }) {
             Spacer(modifier = Modifier.height(8.dp))
         }
 
-        // Estados de carga, error o resultados
         when {
             loading -> {
                 item(span = { GridItemSpan(maxLineSpan) }) {
@@ -154,9 +183,9 @@ fun CatalogScreen() {
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 32.dp),
-                        contentAlignment = androidx.compose.ui.Alignment.Center
+                        contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator()
+                        CircularProgressIndicator(color = CinemaGold)
                     }
                 }
             }
@@ -165,14 +194,17 @@ fun CatalogScreen() {
                 item(span = { GridItemSpan(maxLineSpan) }) {
                     Text(
                         text = "Error: $error",
-                        color = MaterialTheme.colorScheme.error
+                        color = Color(0xFFFF8A80)
                     )
                 }
             }
 
             filteredMovies.isEmpty() -> {
                 item(span = { GridItemSpan(maxLineSpan) }) {
-                    Text("No se encontraron películas.")
+                    Text(
+                        text = "No se encontraron películas.",
+                        color = CinemaTextSecondary
+                    )
                 }
             }
 
